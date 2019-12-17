@@ -64,16 +64,16 @@ typedef struct {
 static PyObject* PyDetection_New( PyTypeObject* type, PyObject* args, PyObject* kwds )
 {
 	printf(LOG_PY_INFERENCE "PyDetection_New()\n");
-	
+
 	// allocate a new container
 	PyDetection_Object* self = (PyDetection_Object*)type->tp_alloc(type, 0);
-	
+
 	if( !self )
 	{
 		PyErr_SetString(PyExc_MemoryError, LOG_PY_INFERENCE "detectNet.Detection tp_alloc() failed to allocate a new object");
 		return NULL;
 	}
-	
+
 	self->det.Reset();
 	return (PyObject*)self;
 }
@@ -83,10 +83,10 @@ static PyObject* PyDetection_New( PyTypeObject* type, PyObject* args, PyObject* 
 static int PyDetection_Init( PyDetection_Object* self, PyObject* args, PyObject* kwds )
 {
 	printf(LOG_PY_INFERENCE "PyDetection_Init()\n");
-	
+
 	// parse arguments
 	int classID = 0;
-	
+
 	float conf   = 0.0f;
 	float left   = 0.0f;
 	float top    = 0.0f;
@@ -100,8 +100,8 @@ static int PyDetection_Init( PyDetection_Object* self, PyObject* args, PyObject*
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet.Detection.__init()__ failed to parse args tuple");
 		return -1;
 	}
-  
-	if( classID < 0 )	
+
+	if( classID < 0 )
 		classID = 0;
 
 	// populate struct
@@ -119,7 +119,7 @@ static int PyDetection_Init( PyDetection_Object* self, PyObject* args, PyObject*
 // Deallocate
 static void PyDetection_Dealloc( PyDetection_Object* self )
 {
-	printf(LOG_PY_INFERENCE "PyDetection_Dealloc()\n");
+	//printf(LOG_PY_INFERENCE "PyDetection_Dealloc()\n");
 
 	// free the container
 	Py_TYPE(self)->tp_free((PyObject*)self);
@@ -138,7 +138,7 @@ static PyObject* PyDetection_ToString( PyDetection_Object* self )
 	// format string
 	char str[1024];
 
-	sprintf(str, 
+	sprintf(str,
 		   "<detectNet.Detection object>\n"
 		   "   -- ClassID: %i\n"
 		   "   -- Confidence: %g\n"
@@ -150,7 +150,7 @@ static PyObject* PyDetection_ToString( PyDetection_Object* self )
 		   "   -- Height:  %g\n"
 		   "   -- Area:    %g\n"
 		   "   -- Center:  (%g, %g)",
-		   self->det.ClassID, self->det.Confidence, 
+		   self->det.ClassID, self->det.Confidence,
 		   self->det.Left, self->det.Top, self->det.Right, self->det.Bottom,
 		   self->det.Width(), self->det.Height(), self->det.Area(), cx, cy);
 
@@ -404,7 +404,7 @@ static PyObject* PyDetection_GetCenter( PyDetection_Object* self, void* closure 
 	return tuple;
 }
 
-static PyGetSetDef pyDetection_GetSet[] = 
+static PyGetSetDef pyDetection_GetSet[] =
 {
 	{ "Instance", (getter)PyDetection_GetInstance, (setter)PyDetection_SetInstance, "Instance index of the detected object", NULL},
 	{ "ClassID", (getter)PyDetection_GetClassID, (setter)PyDetection_SetClassID, "Class index of the detected object", NULL},
@@ -420,13 +420,13 @@ static PyGetSetDef pyDetection_GetSet[] =
 	{ NULL } /* Sentinel */
 };
 
-static PyMethodDef pyDetection_Methods[] = 
+static PyMethodDef pyDetection_Methods[] =
 {
 	{ "Contains", (PyCFunction)PyDetection_Contains, METH_VARARGS|METH_KEYWORDS, "Return true if the given coordinate lies inside of the bounding box"},
 	{ NULL }  /* Sentinel */
 };
 
-static PyTypeObject pyDetection_Type = 
+static PyTypeObject pyDetection_Type =
 {
     PyVarObject_HEAD_INIT(NULL, 0)
 };
@@ -460,7 +460,7 @@ typedef struct {
 static int PyDetectNet_Init( PyDetectNet_Object* self, PyObject *args, PyObject *kwds )
 {
 	printf(LOG_PY_INFERENCE "PyDetectNet_Init()\n");
-	
+
 	// parse arguments
 	PyObject* argList     = NULL;
 	const char* network   = "ssd-mobilenet-v2";
@@ -473,7 +473,7 @@ static int PyDetectNet_Init( PyDetectNet_Object* self, PyObject *args, PyObject 
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet.__init()__ failed to parse args tuple");
 		return -1;
 	}
-    
+
 	// determine whether to use argv or built-in network
 	if( argList != NULL && PyList_Check(argList) && PyList_Size(argList) > 0 )
 	{
@@ -499,7 +499,7 @@ static int PyDetectNet_Init( PyDetectNet_Object* self, PyObject *args, PyObject 
 		for( size_t n=0; n < argc; n++ )
 		{
 			PyObject* item = PyList_GetItem(argList, n);
-			
+
 			if( !PyArg_Parse(item, "s", &argv[n]) )
 			{
 				PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet.__init()__ failed to parse argv list");
@@ -518,17 +518,17 @@ static int PyDetectNet_Init( PyDetectNet_Object* self, PyObject *args, PyObject 
 	else
 	{
 		printf(LOG_PY_INFERENCE "detectNet loading build-in network '%s'\n", network);
-		
+
 		// parse the selected built-in network
 		detectNet::NetworkType networkType = detectNet::NetworkTypeFromStr(network);
-		
+
 		if( networkType == detectNet::CUSTOM )
 		{
 			PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet invalid built-in network was requested");
 			printf(LOG_PY_INFERENCE "detectNet invalid built-in network was requested ('%s')\n", network);
 			return -1;
 		}
-		
+
 		// load the built-in network
 		self->net = detectNet::Create(networkType, threshold);
 	}
@@ -563,7 +563,7 @@ static PyObject* PyDetectNet_Detect( PyDetectNet_Object* self, PyObject* args, P
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet invalid object instance");
 		return NULL;
 	}
-	
+
 	// parse arguments
 	PyObject* capsule = NULL;
 
@@ -658,7 +658,7 @@ PyObject* PyDetectNet_SetThreshold( PyDetectNet_Object* self, PyObject* args )
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet invalid object instance");
 		return NULL;
 	}
-	
+
 	float threshold = 0.0f;
 
 	if( !PyArg_ParseTuple(args, "f", &threshold) )
@@ -666,7 +666,7 @@ PyObject* PyDetectNet_SetThreshold( PyDetectNet_Object* self, PyObject* args )
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet.SetThreshold() failed to parse arguments");
 		return NULL;
 	}
-		
+
 	self->net->SetThreshold(threshold);
 	Py_RETURN_NONE;
 }
@@ -704,7 +704,7 @@ PyObject* PyDetectNet_GetClassDesc( PyDetectNet_Object* self, PyObject* args )
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet invalid object instance");
 		return NULL;
 	}
-	
+
 	int classIdx = 0;
 
 	if( !PyArg_ParseTuple(args, "i", &classIdx) )
@@ -712,7 +712,7 @@ PyObject* PyDetectNet_GetClassDesc( PyDetectNet_Object* self, PyObject* args )
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet.GetClassDesc() failed to parse arguments");
 		return NULL;
 	}
-		
+
 	if( classIdx < 0 || classIdx >= self->net->GetNumClasses() )
 	{
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet requested class index is out of bounds");
@@ -728,7 +728,7 @@ PyObject* PyDetectNet_GetClassDesc( PyDetectNet_Object* self, PyObject* args )
 				 	    "Parameters:\n" \
 					    "  (int) -- index of the class, between [0, GetNumClasses()]\n\n" \
 					    "Returns:\n" \
-					    "  (string) -- the synset of the class, typically 9 characters long" 
+					    "  (string) -- the synset of the class, typically 9 characters long"
 
 // GetClassSynset
 PyObject* PyDetectNet_GetClassSynset( PyDetectNet_Object* self, PyObject* args )
@@ -738,7 +738,7 @@ PyObject* PyDetectNet_GetClassSynset( PyDetectNet_Object* self, PyObject* args )
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet invalid object instance");
 		return NULL;
 	}
-	
+
 	int classIdx = 0;
 
 	if( !PyArg_ParseTuple(args, "i", &classIdx) )
@@ -746,7 +746,7 @@ PyObject* PyDetectNet_GetClassSynset( PyDetectNet_Object* self, PyObject* args )
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet.GetClassSynset() failed to parse arguments");
 		return NULL;
 	}
-		
+
 	if( classIdx < 0 || classIdx >= self->net->GetNumClasses() )
 	{
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet requested class index is out of bounds");
@@ -770,7 +770,7 @@ PyObject* PyDetectNet_SetOverlayAlpha( PyDetectNet_Object* self, PyObject* args,
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet invalid object instance");
 		return NULL;
 	}
-	
+
 	float alpha = 0.0f;
 	static char* kwlist[] = {"alpha", NULL};
 
@@ -779,7 +779,7 @@ PyObject* PyDetectNet_SetOverlayAlpha( PyDetectNet_Object* self, PyObject* args,
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet.SetOverlayAlpha() failed to parse arguments");
 		return NULL;
 	}
-		
+
 	if( alpha < 0.0f || alpha > 255.0f )
 	{
 		PyErr_SetString(PyExc_Exception, LOG_PY_INFERENCE "detectNet.SetOverlayAlpha() -- provided alpha value is out-of-range");
@@ -804,21 +804,21 @@ static PyObject* PyDetectNet_Usage( PyDetectNet_Object* self )
 }
 
 //-------------------------------------------------------------------------------
-static PyTypeObject pyDetectNet_Type = 
+static PyTypeObject pyDetectNet_Type =
 {
     PyVarObject_HEAD_INIT(NULL, 0)
 };
 
-static PyMethodDef pyDetectNet_Methods[] = 
+static PyMethodDef pyDetectNet_Methods[] =
 {
 	{ "Detect", (PyCFunction)PyDetectNet_Detect, METH_VARARGS|METH_KEYWORDS, DOC_DETECT},
 	{ "GetThreshold", (PyCFunction)PyDetectNet_GetThreshold, METH_NOARGS, DOC_GET_THRESHOLD},
-	{ "SetThreshold", (PyCFunction)PyDetectNet_SetThreshold, METH_VARARGS, DOC_SET_THRESHOLD},     
+	{ "SetThreshold", (PyCFunction)PyDetectNet_SetThreshold, METH_VARARGS, DOC_SET_THRESHOLD},
 	{ "GetNumClasses", (PyCFunction)PyDetectNet_GetNumClasses, METH_NOARGS, DOC_GET_NUM_CLASSES},
 	{ "GetClassDesc", (PyCFunction)PyDetectNet_GetClassDesc, METH_VARARGS, DOC_GET_CLASS_DESC},
 	{ "GetClassSynset", (PyCFunction)PyDetectNet_GetClassSynset, METH_VARARGS, DOC_GET_CLASS_SYNSET},
 	{ "SetOverlayAlpha", (PyCFunction)PyDetectNet_SetOverlayAlpha, METH_VARARGS|METH_KEYWORDS, DOC_SET_OVERLAY_ALPHA},
-	{ "Usage", (PyCFunction)PyDetectNet_Usage, METH_NOARGS|METH_STATIC, DOC_USAGE_STRING},	
+	{ "Usage", (PyCFunction)PyDetectNet_Usage, METH_NOARGS|METH_STATIC, DOC_USAGE_STRING},
 	{NULL}  /* Sentinel */
 };
 
@@ -827,7 +827,7 @@ bool PyDetectNet_Register( PyObject* module )
 {
 	if( !module )
 		return false;
-	
+
 	/*
 	 * register detectNet.Detection type
 	 */
@@ -848,7 +848,7 @@ bool PyDetectNet_Register( PyObject* module )
 		printf(LOG_PY_INFERENCE "detectNet.Detection PyType_Ready() failed\n");
 		return false;
 	}
-	
+
 	Py_INCREF(&pyDetection_Type);
 
 
@@ -864,7 +864,7 @@ bool PyDetectNet_Register( PyObject* module )
 	pyDetectNet_Type.tp_init		= (initproc)PyDetectNet_Init;
 	pyDetectNet_Type.tp_dealloc	= NULL; /*(destructor)PyDetectNet_Dealloc;*/
 	pyDetectNet_Type.tp_doc		= DOC_DETECTNET;
-	 
+
 	// setup Detection as inner class for detectNet object
 	pyDetectNet_Type.tp_dict = PyDict_New();
 
@@ -886,7 +886,7 @@ bool PyDetectNet_Register( PyObject* module )
 		printf(LOG_PY_INFERENCE "detectNet PyType_Ready() failed\n");
 		return false;
 	}
-	
+
 	Py_INCREF(&pyDetectNet_Type);
 
 	if( PyModule_AddObject(module, "detectNet", (PyObject*)&pyDetectNet_Type) < 0 )
@@ -894,8 +894,6 @@ bool PyDetectNet_Register( PyObject* module )
 		printf(LOG_PY_INFERENCE "detectNet PyModule_AddObject('detectNet') failed\n");
 		return false;
 	}
-	
+
 	return true;
 }
-
-
