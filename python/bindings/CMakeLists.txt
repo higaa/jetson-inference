@@ -31,7 +31,7 @@ endif()
 
 message("-- found Python version:  ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} (${PYTHONLIBS_VERSION_STRING})")
 message("-- found Python include:  ${PYTHON_INCLUDE_DIRS}")
-message("-- found Python library:  ${PYTHON_LIBRARIES}") 
+message("-- found Python library:  ${PYTHON_LIBRARIES}")
 
 include_directories(${PYTHON_INCLUDE_DIRS})
 
@@ -53,6 +53,5 @@ set(PYTHON_BINDING_INSTALL_DIR /usr/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_V
 
 install(TARGETS jetson-inference-python-${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR} DESTINATION ${PYTHON_BINDING_INSTALL_DIR})
 
-install(DIRECTORY ../python/Jetson DESTINATION ${PYTHON_BINDING_INSTALL_DIR})
+#install(DIRECTORY ../python/Jetson DESTINATION ${PYTHON_BINDING_INSTALL_DIR})
 install(DIRECTORY ../python/jetson DESTINATION ${PYTHON_BINDING_INSTALL_DIR})
-
